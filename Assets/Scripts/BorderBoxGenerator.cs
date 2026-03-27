@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UniformClockwiseBorderSpawner : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private BossDefinition bossDefinition;
     [SerializeField] private RectTransform imageContainer;
     [SerializeField] private RectTransform borderContainer;
     [SerializeField] private RectTransform boxPrefab;
@@ -21,6 +23,10 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private float spawnDelay = 1f;
     [SerializeField] private bool snapToWholePixels = true;
+
+    [Header("Stat Colors")]
+    [SerializeField] private Color healthColor = Color.red;
+    [SerializeField] private Color shieldColor = Color.blue;
 
     private readonly List<RectTransform> spawnedBoxes = new();
     private Coroutine spawnRoutine;
@@ -40,6 +46,11 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
         }
 
         ClearBoxes();
+
+        if (bossDefinition != null)
+        {
+            boxCount = bossDefinition.startingShield + bossDefinition.maxHealth;
+        }
 
         if (!TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows))
             return;
@@ -70,6 +81,12 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
             box.anchoredPosition = pos;
             box.sizeDelta = finalSize;
 
+            Image boxImage = box.GetComponent<Image>();
+            if (boxImage != null)
+            {
+                boxImage.color = GetBoxColorByIndex(i);
+            }
+
             spawnedBoxes.Add(box);
             Debug.LogWarning("adding a box");
 
@@ -78,6 +95,16 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
         }
 
         spawnRoutine = null;
+    }
+
+    private Color GetBoxColorByIndex(int index)
+    {
+        if (bossDefinition == null)
+            return healthColor;
+
+        return index < bossDefinition.startingShield
+            ? shieldColor
+            : healthColor;
     }
 
     private bool TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows)
