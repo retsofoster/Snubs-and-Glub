@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e711eea8b3037164ab94272df3b81416, type: 3}
+  m_Name: BeefCake
+  m_EditorClassIdentifier: Assembly-CSharp::BossDefinition
+  bossName: BeefCake
+  maxHealth: 20
+  startingShield: 8
+  portrait: {fileID: -6847312760366674510, guid: d0e19488d64d7464196e126b0e600ca3, type: 3}
