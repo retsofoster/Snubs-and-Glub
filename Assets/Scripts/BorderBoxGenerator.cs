@@ -12,7 +12,6 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
     [SerializeField] private RectTransform boxPrefab;
 
     [Header("Border Settings")]
-    [SerializeField] private int boxCount = 20;
     [SerializeField] private float spacing = 4f;
     [SerializeField] private float padding = 8f;
 
@@ -47,12 +46,11 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
 
         ClearBoxes();
 
-        if (bossDefinition != null)
-        {
-            boxCount = bossDefinition.startingShield + bossDefinition.maxHealth;
-        }
+        int boxCount = GetTotalBoxCount();
+        if (boxCount <= 0)
+            return;
 
-        if (!TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows))
+        if (!TryBuildLayout(boxCount, out List<Vector2> positions, out float boxSize, out int columns, out int rows))
             return;
 
         ResizeImageToInnerGrid(columns, rows, boxSize);
@@ -107,7 +105,18 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
             : healthColor;
     }
 
-    private bool TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows)
+    private int GetTotalBoxCount()
+    {
+        if (bossDefinition == null)
+        {
+            Debug.LogWarning("UniformClockwiseBorderSpawner requires a BossDefinition reference.");
+            return 0;
+        }
+
+        return bossDefinition.startingShield + bossDefinition.maxHealth;
+    }
+
+    private bool TryBuildLayout(int boxCount, out List<Vector2> positions, out float boxSize, out int columns, out int rows)
     {
         positions = null;
         boxSize = 0f;
