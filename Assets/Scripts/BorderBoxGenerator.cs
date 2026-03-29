@@ -1,16 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UniformClockwiseBorderSpawner : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] private BossDefinition bossDefinition;
     [SerializeField] private RectTransform imageContainer;
     [SerializeField] private RectTransform borderContainer;
     [SerializeField] private RectTransform boxPrefab;
 
     [Header("Border Settings")]
-    [SerializeField] private int boxCount = 20;
     [SerializeField] private float spacing = 4f;
     [SerializeField] private float padding = 8f;
 
@@ -21,6 +22,10 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private float spawnDelay = 1f;
     [SerializeField] private bool snapToWholePixels = true;
+
+    [Header("Stat Colors")]
+    [SerializeField] private Color healthColor = Color.red;
+    [SerializeField] private Color shieldColor = Color.blue;
 
     private readonly List<RectTransform> spawnedBoxes = new();
     private Coroutine spawnRoutine;
@@ -41,7 +46,11 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
 
         ClearBoxes();
 
-        if (!TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows))
+        int boxCount = GetTotalBoxCount();
+        if (boxCount <= 0)
+            return;
+
+        if (!TryBuildLayout(boxCount, out List<Vector2> positions, out float boxSize, out int columns, out int rows))
             return;
 
         ResizeImageToInnerGrid(columns, rows, boxSize);
@@ -70,6 +79,12 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
             box.anchoredPosition = pos;
             box.sizeDelta = finalSize;
 
+            Image boxImage = box.GetComponent<Image>();
+            if (boxImage != null)
+            {
+                boxImage.color = GetBoxColorByIndex(i);
+            }
+
             spawnedBoxes.Add(box);
             Debug.LogWarning("adding a box");
 
@@ -80,7 +95,28 @@ public class UniformClockwiseBorderSpawner : MonoBehaviour
         spawnRoutine = null;
     }
 
-    private bool TryBuildLayout(out List<Vector2> positions, out float boxSize, out int columns, out int rows)
+    private Color GetBoxColorByIndex(int index)
+    {
+        if (bossDefinition == null)
+            return healthColor;
+
+        return index < bossDefinition.startingShield
+            ? shieldColor
+            : healthColor;
+    }
+
+    private int GetTotalBoxCount()
+    {
+        if (bossDefinition == null)
+        {
+            Debug.LogWarning("UniformClockwiseBorderSpawner requires a BossDefinition reference.");
+            return 0;
+        }
+
+        return bossDefinition.startingShield + bossDefinition.maxHealth;
+    }
+
+    private bool TryBuildLayout(int boxCount, out List<Vector2> positions, out float boxSize, out int columns, out int rows)
     {
         positions = null;
         boxSize = 0f;
